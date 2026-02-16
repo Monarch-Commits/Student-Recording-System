@@ -61,7 +61,7 @@ loginForm.addEventListener('submit', async (e) => {
     });
 
     setTimeout(() => {
-      window.location.href = '/Test/Student/StudentGet.html';
+      window.location.href = '/Dashboard/Dashboard.html';
     }, 1500);
   } catch (error) {
     Swal.fire({
