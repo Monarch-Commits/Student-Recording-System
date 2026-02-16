@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="../styling/style.css">
+ <title>Dashboard</title>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.18/jspdf.plugin.autotable.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+
+<body>
+
+  <img class="img" src="../image/usmkcclogo-removebg-preview.png" alt="">
+
+   <nav class="Holdings">
+    
+    <div>
+      <i class="fas fa-bars" id="menu"></i>
+      <img src="../image/usmkcclogo-removebg-preview.png" alt="">
+      <h6>USM-KCC</h6>
+    </div>   
+     <button type="button" id="toggleFormStudent">Add Student</button>
+     <button type="button" id="toggleFormPH">Add PH Student</button>
+     <button type="button" id="record">View Records</button>
+     <button id="logout" type="submit">Logout</i></button>
+   </nav>
+   
+   <div class="count">
+    <div class="count-box">
+      <h1>STUDENT COUNT</h1>
+        <h4 id="totalStudents">Student Count: 0</h4>
+        <h4 id="maleStudents">Student Male Count: 0</h4>
+        <h4 id="femaleStudents">Student Female Count: 0</h4>
+    </div>
+    
+    <div class="count-box">
+      <h2> PHYSICAL HANDICAP COUNT</h2>
+      <h4 id="totalStudentsPH">Student  Count: 0</h4>
+      <h4 id="maleStudentsPH">Student Male Count: 0</h4>
+      <h4 id="femaleStudentsPH">Student Female Count: 0</h4>
+    </div>
+</div>
+
+<!--Student Form-->
+   <form id="studentForm">
+    <div class="form-group">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" placeholder="Enter Name">
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="year">Year Level:</label>
+        <select id="year">
+          <option value="1ST YEAR">1ST YEAR</option>
+          <option value="2ND YEAR">2ND YEAR</option>
+          <option value="3RD YEAR">3RD YEAR</option>
+          <option value="4TH YEAR">4TH YEAR</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" id="address" placeholder="Enter Address">
+      </div>
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="gender">Gender:</label>
+        <select id="gender">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="program">Program:</label>
+        <input type="text" id="program" placeholder="Program">
+      </div>
+    </div>
+  
+    <div class="form-group">
+      <label for="major">Major:</label>
+      <input type="text" id="major" placeholder="Major">       
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ip">Ethnicity:</label>
+        <input type="text" id="ip" placeholder="Enter Ethnicity">
+      </div>
+      <div class="form-group">
+        <label for="workingStudent">Working Student:</label>
+        <select id="workingStudent">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+    </div>
+  
+    <div class="form-group">
+      <label for="contactNumber">Contact Number (11 digits):</label>
+      <input type="tel" id="contactNumber" pattern="[0-9]{11}" placeholder="Enter Contact Number" required>
+    </div>
+  
+    <button type="submit">Add Student</button>
+    <button type="button" id="studentFormBack">Back</button>
+  </form>
+  
+<!--NEW STUDENT PH-->
+<form id="studentPH">
+  <div class="form-group">
+    <label for="namePH">Full Name:</label>
+    <input type="text" id="namePH" placeholder="Enter Name">
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="yearPH">Year Level:</label>
+      <select id="yearPH">
+        <option value="1ST YEAR">1ST YEAR</option>
+        <option value="2ND YEAR">2ND YEAR</option>
+        <option value="3RD YEAR">3RD YEAR</option>
+        <option value="4TH YEAR">4TH YEAR</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="address">Address:</label>
+      <input type="text" id="addressPH" placeholder="Enter Address">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="genderPH">Gender:</label>
+      <select id="genderPH">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="majorPH">Major:</label>
+    <input type="text" placeholder="Major" id="majorPH">
+    </div>
+
+   
+    <div class="form-group">
+      <label for="programPH">Program:</label>
+      <input type="text" id="programPH" placeholder="Program">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="physicalHandicap">Physical Handicap:</label>
+    <input type="text" id="physicalHandicap" placeholder="Physical Handicap">
+    
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="ipPH">Ethnicity:</label>
+      <input type="text" id="ipPH" placeholder="Enter Ethnicity">
+    </div>
+    <div class="form-group">
+      <label for="workingStudentPH">Working Student:</label>
+      <select id="workingStudentPH">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="contactNumberPH">Contact Number (11 digits):</label>
+    <input type="tel" id="contactNumberPH" pattern="[0-9]{11}" placeholder="Enter Contact Number" required>
+  </div>
+
+  <button type="submit">Add Student PH</button>
+  <button type="button" id="studentFormPHBack">Back</button>
+</form>
+
+
+
+  <div id="records">
+    <button type="submit" id="BackRecords">Back</button>
+    <button type="button" id="studentRecord">Student Records</button>
+    <button type="button" id="yellow">Physical Handicap Records</button>
+  </div>
+
+<div id="tableData">
+  <div id="nav">
+
+    <button class="slide-btn" id="download" type="button">
+      <span class="icon"><i class="fas fa-file-pdf"></i></span>
+      <span class="text">Download PDF</span>
+    </button>
+    
+    <!--SEARCH DROPDOWN-->
+    <div class="searchFilter">
+    <div class="filter-container">
+      <label for="filterOption">Filter by:</label>
+      <select id="filterOption" name="filterOption">
+          <option value="name">Name</option>
+          <option value="gender">Gender</option>
+          <option value="address">Address</option>
+          <option value="contact">Contact Number</option>
+          <option value="year">Year</option>
+          <option value="program">Program</option>
+          <option value="major">Major</option>
+          <option value="ip">Ethnicity</option>
+          <option value="workingStudent">Working Student</option>
+      </select>
+  </div>
+  
+    
+    <div class="search-container">
+   <input type="search" id="searchInput" placeholder="Search here...">
+   <i class="fas fa-search search-icon"></i> 
+  </div>
+ </div>
+    <button type="button" id="cancel">Back</button>
+
+  </div>
+  <h2>Male Students</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Year Level</th>
+            <th>Address</th>
+            <th>Program</th>
+            <th>Major</th>
+            <th>Ethnicity</th>
+            <th>Working Student</th>
+            <th>Contact Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="StudentDataMale"></tbody>
+</table>
+
+<h2>Female Students</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Year Level</th>
+            <th>Address</th>
+            <th>Program</th>
+            <th>Major</th>
+            <th>Ethnicity</th>
+            <th>Working Student</th>
+            <th>Contact Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="StudentDataFemale"></tbody>
+</table>
+</div>
+<!--FETCH PH DATA-->
+
+<div id="tableDataPH">
+  <div id="navPH">
+
+    <button class="slide-btnPH" id="downloadPH" type="button">
+      <span class="icon"><i class="fas fa-file-pdf"></i></span>
+      <span class="text">Download PDF</span>
+    </button>
+
+    <div class="searchFilterPH">
+      <div class="filter-container">
+        <label for="filterOptionPH">Filter by:</label>
+        <select id="filterOptionPH" name="filterOptionPH">
+            <option value="namePH">Name</option>
+            <option value="genderPH">Gender</option>
+            <option value="physicalHandicap">Physical Handicap</option>
+            <option value="addressPH">Address</option>
+            <option value="contactNumberPH">Contact Number</option>
+            <option value="yearPH">Year</option>
+            <option value="programPH">Program</option>
+            <option value="majorPH">Major</option>
+            <option value="ipPH">Ethnicity</option>
+            <option value="workingStudentPH">Working Student</option>
+        </select>
+    </div>
+
+    
+    
+    <div class="search-containerPH">
+      <input type="search" id="searchPH" placeholder="Search here...">
+      <i class="fas fa-search search-icon"></i> 
+  </div>
+</div>
+    <button type="button" id="cancelPH">Back</button>
+
+ 
+</div>
+  <h2>PH Male Students</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Physical Handicap</th>
+            <th>Year Level</th>
+            <th>Address</th>
+            <th>Program</th>
+            <th>Major</th>
+            <th>Ethnicity</th>
+            <th>Working Student</th>
+            <th>Contact Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="StudentDataMalePH"></tbody>
+</table>
+
+<h2>PH Female Students</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Physical Handicap</th>
+            <th>Year Level</th>
+            <th>Address</th>
+            <th>Program</th>
+            <th>Major</th>
+            <th>Ethnicity</th>
+            <th>Working Student</th>
+            <th>Contact Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="StudentDataFemalePH"></tbody>
+</table>
+</div>
+
+<!--EDIT-->
+<div class="edit-container" id="editContainer">
+
+<form id="editForm" >
+  <div class="form-group">
+    <label for="editName">Full Name:</label>
+    <input type="text" id="editName" placeholder="Enter Name">
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="editYear">Year Level:</label>
+      <select id="editYear">
+        <option value="1ST YEAR">1ST YEAR</option>
+        <option value="2ND YEAR">2ND YEAR</option>
+        <option value="3RD YEAR">3RD YEAR</option>
+        <option value="4TH YEAR">4TH YEAR</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="editAddress">Address:</label>
+      <input type="text" id="editAddress" placeholder="Enter Address">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="editGender">Gender:</label>
+      <select id="editGender">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="editProgram">Program:</label>
+      <input id="editProgram" placeholder="Program">
+      
+
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="Editmajor">Major:</label>
+    <input type="text" id="Editmajor" placeholder="Major">
+     
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="editIp">Ethnicity:</label>
+      <input type="text" id="editIp" placeholder="Enter Ethnicity">
+    </div>
+    <div class="form-group">
+      <label for="editWorkingStudent">Working Student:</label>
+      <select id="editWorkingStudent">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="editContactNumber">Contact Number (11 digits):</label>
+    <input type="tel" id="editContactNumber" pattern="[0-9]{11}" placeholder="Enter Contact Number" required>
+  </div>
+
+  <button type="submit">Update Student</button>
+  <button type="button" id="editCancel">Cancel</button>
+</form>
+</div>
+
+
+<!--EDIT PH STUDENT-->
+<div class="edit-container" id="editContainerPH">
+
+  <form id="editFormPH">
+    <div class="form-group">
+      <label for="EditnamePH">Full Name:</label>
+      <input type="text" id="EditnamePH" placeholder="Enter Name">
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="EdityearPH">Year Level:</label>
+        <select id="EdityearPH">
+          <option value="1ST YEAR">1ST YEAR</option>
+          <option value="2ND YEAR">2ND YEAR</option>
+          <option value="3RD YEAR">3RD YEAR</option>
+          <option value="4TH YEAR">4TH YEAR</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="EditaddressPH">Address:</label>
+        <input type="text" id="EditaddressPH" placeholder="Enter Address">
+      </div>
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="EditgenderPH">Gender:</label>
+        <select id="EditgenderPH">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+  
+      <div class="form-group">
+        <label for="EditmajorPH">Major:</label>
+        <input type="text" placeholder="Major" id="EditmajorPH">
+      </div>
+  
+     
+      <div class="form-group">
+        <label for="EditprogramPH">Program:</label>
+        <input type="text" id="EditprogramPH" placeholder="Program">
+      </div>
+    </div>
+  
+    <div class="form-group">
+      <label for="EditphysicalHandicap">Physical Handicap:</label>
+      <input type="text" id="EditphysicalHandicap" placeholder="Physical Handicap">
+    </div>
+  
+    <div class="form-row">
+      <div class="form-group">
+        <label for="EditipPH">Ethnicity:</label>
+        <input type="text" id="EditipPH" placeholder="Enter Ethnicity">
+      </div>
+      <div class="form-group">
+        <label for="EditworkingStudentPH">Working Student:</label>
+        <select id="EditworkingStudentPH">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+    </div>
+  
+    <div class="form-group">
+      <label for="EditcontactNumberPH">Contact Number (11 digits):</label>
+      <input type="tel" id="EditcontactNumberPH" pattern="[0-9]{11}" placeholder="Enter Contact Number" required>
+    </div>
+  
+    <button type="submit">Update Student PH</button>
+    <button type="button" id="editCancelPH">Cancel</button>
+  </form>
+  </div>
+
+<script type="module" src="../javaScript/script.js"></script>
+
+</body>
+</html>
+
+

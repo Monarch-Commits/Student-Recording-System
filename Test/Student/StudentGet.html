@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Student Records Data Table</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- FOR ALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- FOR DOWNLOAD PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style type="text/tailwindcss">
+      :root {
+        --dark-green: #064e3b;
+        --vibrant-yellow-green: #a3e635;
+        --soft-yellow-green: #d9f99d;
+        --deep-forest: #022c22;
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary-dark': '#064e3b',
+              'accent-yellow': '#a3e635',
+              'forest-hover': '#022c22',
+            },
+            fontFamily: {
+              display: ['Lexend'],
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-display bg-slate-50 text-slate-800 min-h-screen">
+    <header
+      class="bg-white border-b border-primary-dark/10 sticky top-0 z-30 px-6 py-4 shadow-sm"
+    >
+      <div class="max-w-[1600px] mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <a href="../Test.html" class="group flex items-center gap-3">
+            <div
+              class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 transition-all group-hover:bg-emerald-500 group-hover:text-white"
+            >
+              <span class="material-icons-round text-accent-yellow">
+                school
+              </span>
+            </div>
+          </a>
+
+          <div>
+            <h1
+              class="text-xl font-bold tracking-tight text-primary-dark leading-none"
+            >
+              Student Records
+            </h1>
+            <p
+              class="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold"
+            >
+              Management System
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto p-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div
+          class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"
+        >
+          <div class="bg-primary-dark/10 p-3 rounded-lg text-primary-dark">
+            <span class="material-icons-round">groups</span>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase font-semibold">
+              Total Students
+            </p>
+            <p
+              id="totalRegisteredCount"
+              class="text-2xl font-bold text-primary-dark"
+            ></p>
+          </div>
+        </div>
+        <div
+          class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"
+        >
+          <div class="bg-accent-yellow/20 p-3 rounded-lg text-primary-dark">
+            <span class="material-icons-round">work</span>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase font-semibold">
+              Working Students
+            </p>
+            <p
+              id="workingCount"
+              class="text-2xl font-bold text-primary-dark"
+            ></p>
+          </div>
+        </div>
+        <div
+          class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"
+        >
+          <div class="bg-primary-dark/10 p-3 rounded-lg text-primary-dark">
+            <span class="material-icons-round">male</span>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase font-semibold">Male</p>
+            <p id="maleCount" class="text-2xl font-bold text-primary-dark"></p>
+          </div>
+        </div>
+        <div
+          class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"
+        >
+          <div class="bg-accent-yellow/20 p-3 rounded-lg text-primary-dark">
+            <span class="material-icons-round">female</span>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase font-semibold">Female</p>
+            <p
+              id="femaleCount"
+              class="text-2xl font-bold text-primary-dark"
+            ></p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6"
+      >
+        <div class="flex flex-1 items-center gap-3">
+          <div class="relative w-full max-w-md">
+            <span
+              class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+            >
+              search
+            </span>
+            <input
+              class="w-full bg-white border border-slate-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow transition-all"
+              type="search"
+              id="searchInput"
+              placeholder="Search here..."
+            />
+          </div>
+          <div class="relative flex items-center">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"
+            >
+              <span class="material-icons-round text-sm">filter_list</span>
+            </span>
+
+            <select
+              id="filterOption"
+              name="filterOption"
+              class="appearance-none bg-white border border-slate-300 hover:border-primary-dark rounded-lg font-medium transition-all shadow-sm hover:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-yellow w-10 pl-10 pr-0 py-2 overflow-hidden whitespace-nowrap sm:w-auto sm:pl-10 sm:pr-10 sm:text-slate-700 text-sm"
+            >
+              <option value="name">Name</option>
+              <option value="address">Address</option>
+              <option value="contact">Contact Number</option>
+              <option value="year">Year</option>
+              <option value="program">Program</option>
+              <option value="major">Major</option>
+              <option value="ip">Ethnicity</option>
+              <option value="workingStudent">Working Student</option>
+            </select>
+
+            <span
+              class="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative min-w-[140px]">
+            <select
+              id="genderFilter"
+              class="appearance-none w-full bg-white border border-slate-200 text-slate-700 text-sm rounded-xl px-4 py-2.5 pr-10 cursor-pointer transition-all duration-200 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
+            >
+              <option value="all">All Genders</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+
+            <div
+              class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400"
+            >
+              <span class="material-symbols-outlined text-lg">unfold_more</span>
+            </div>
+          </div>
+          <button
+            id="download"
+            class="px-4 py-2 border border-primary-dark text-primary-dark hover:bg-accent-yellow/10 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+          >
+            <span class="material-icons-round text-sm">file_download</span>
+            <span class="sm:flex hidden">Export CSV</span>
+          </button>
+          <button
+            id="toggleFormStudent"
+            class="bg-primary-dark hover:bg-forest-hover text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-md transition-all flex items-center gap-2"
+          >
+            <span class="material-icons-round text-sm text-accent-yellow">
+              person_add
+            </span>
+            <span class="sm:flex hidden">Add New Student</span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm"
+      >
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-green-900 text-white">
+              <tr>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Name
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Gender
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Year Level
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Program
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Major
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Ethnicity
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Working Student
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Contact Number
+                </th>
+                <th
+                  class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white text-left"
+                >
+                  Address
+                </th>
+                <th
+                  class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-accent-yellow text-right"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody id="tableBody" class="divide-y divide-slate-300">
+              <!-- Rows will be injected here -->
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 bg-green-50 px-6 py-4"
+        >
+          <p class="text-xs md:text-sm text-slate-500 font-medium">
+            Showing
+            <span id="pageStart" class="text-slate-900 font-semibold"></span>
+            to
+            <span id="pageEnd" class="text-slate-900 font-semibold"></span>
+            of
+            <span id="totalEntries" class="text-slate-900 font-bold"></span>
+            records
+          </p>
+
+          <div id="pageContainer" class="flex items-center gap-1.5">
+            <button
+              id="prevBtn"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-100 text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-700 active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <span class="material-symbols-outlined text-[20px]">
+                chevron_left
+              </span>
+            </button>
+
+            <button
+              id="nextBtn"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-100 text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-700 active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <span class="material-symbols-outlined text-[20px]">
+                chevron_right
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <footer
+        class="mt-8 flex justify-between items-center text-xs text-slate-400"
+      >
+        <p>© 2024 University Student Information Management System</p>
+        <div class="flex gap-4">
+          <a class="hover:text-primary-dark transition-colors" href="#">
+            Privacy Policy
+          </a>
+          <a class="hover:text-primary-dark transition-colors" href="#">
+            Technical Support
+          </a>
+        </div>
+      </footer>
+    </main>
+
+    <!-- MODAL FOR EDIT STUDENT -->
+    <div
+      id="modalWrapper"
+      class="fixed hidden inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-2 sm:p-4 transition-all duration-300"
+    >
+      <div
+        class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 flex flex-col max-h-[95vh] sm:max-h-[95vh] transform transition-all"
+      >
+        <div class="p-3 sm:p-4 border-b border-slate-100 bg-white">
+          <h2
+            class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight"
+          >
+            Student
+            <span class="text-emerald-600">Information</span>
+          </h2>
+          <p class="text-slate-500 mt-1 text-xs sm:text-sm font-medium">
+            Update the academic and personal profile details below.
+          </p>
+        </div>
+        <form
+          id="studentUpdateForm"
+          class="p-2 sm:p-3 md:p-4 max-h-[98vh] relative overflow-y-auto custom-scrollbar space-y-2"
+        >
+          <input type="hidden" id="studentId" />
+
+          <!-- Full Name -->
+          <div class="group">
+            <label
+              for="name"
+              class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+            >
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              required
+              placeholder="e.g. Alexander Pierce"
+              class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all duration-300 placeholder:text-slate-400 text-slate-700 font-medium"
+            />
+          </div>
+
+          <!-- Year Level & Address -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="year"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Year Level
+              </label>
+              <div class="relative">
+                <select
+                  id="year"
+                  class="appearance-none w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all cursor-pointer text-slate-700 font-medium"
+                >
+                  <option value="1ST YEAR">1st Year</option>
+                  <option value="2ND YEAR">2nd Year</option>
+                  <option value="3RD YEAR">3rd Year</option>
+                  <option value="4TH YEAR">4th Year</option>
+                </select>
+                <div
+                  class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label
+                for="address"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Current Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                required
+                placeholder="City, Province"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Gender, Major, Program -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label
+                for="gender"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="major"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Major
+              </label>
+              <input
+                required
+                type="text"
+                id="major"
+                placeholder="Specialization"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              />
+            </div>
+            <div>
+              <label
+                for="program"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Program
+              </label>
+              <input
+                type="text"
+                id="program"
+                required
+                placeholder="Degree"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Ethnicity & Working Status -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="ip"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Ethnicity
+              </label>
+              <input
+                type="text"
+                id="ip"
+                required
+                placeholder="Enter Ethnicity"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              />
+            </div>
+
+            <div>
+              <label
+                for="workingStudent"
+                class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+              >
+                Working Status
+              </label>
+              <select
+                id="workingStudent"
+                class="w-full px-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              >
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Contact Number -->
+          <div class="mb-6 sm:mb-8">
+            <label
+              for="contactNumber"
+              class="block text-xs sm:text-sm font-bold text-emerald-700 uppercase tracking-widest mb-2 ml-1"
+            >
+              Contact Number
+            </label>
+            <div class="relative group">
+              <div
+                class="absolute left-5 top-1/2 -translate-y-1/2 flex items-center pr-3 border-r border-slate-200 pointer-events-none"
+              >
+                <span class="text-slate-400 text-sm font-bold">+63</span>
+              </div>
+              <input
+                type="tel"
+                id="contactNumber"
+                required
+                class="w-full pl-16 pr-5 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div
+            class="sticky bottom-0 z-10 bg-white p-2 sm:p-4 border-t border-slate-100 flex flex-col sm:flex-row gap-4"
+          >
+            <button
+              type="button"
+              id="studentFormBack"
+              class="flex-1 order-2 sm:order-1 px-6 py-3 sm:px-8 sm:py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all duration-300 active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-2xl shadow-lg transition-all duration-300"
+            >
+              Update Student
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="./StudentGet.js"></script>
+  </body>
+</html>
