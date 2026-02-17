@@ -1,5 +1,4 @@
 import '../../Authentication/Logout.js';
-
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getDatabase,
@@ -16,7 +15,6 @@ const database = getDatabase(app);
 
 // Global State
 let allStudents = [];
-let myDonutChart;
 
 // --- Sidebar Logic ---
 const mobileBtn = document.getElementById('mobileMenuBtn');
@@ -24,12 +22,12 @@ const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
 
 function toggleSidebar() {
-  sidebar.classList.toggle('-translate-x-full');
-  overlay.classList.toggle('hidden');
+  sidebar?.classList.toggle('-translate-x-full');
+  overlay?.classList.toggle('hidden');
 }
 
-if (mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
-if (overlay) overlay.addEventListener('click', toggleSidebar);
+mobileBtn?.addEventListener('click', toggleSidebar);
+overlay?.addEventListener('click', toggleSidebar);
 
 // --- Modal Controls ---
 const setupModal = (openBtnId, modalId, closeBtnId) => {
@@ -37,101 +35,101 @@ const setupModal = (openBtnId, modalId, closeBtnId) => {
   const modal = document.getElementById(modalId);
   const closeBtn = document.getElementById(closeBtnId);
 
-  openBtn?.addEventListener('click', () => modal.classList.remove('hidden'));
-  closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+  openBtn?.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+  closeBtn?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  });
 };
 
-// Initialize modals for both Student and PH Student
 setupModal('toggleFormStudent', 'modalWrapper', 'studentFormBack');
 setupModal('toggleFormPH', 'modalPHWrapper', 'studentFormPHBack');
 
-// --- Chart Logic ---
-function initializeChart(male, female) {
-  const ctx = document.getElementById('myDonutChart').getContext('2d');
-  myDonutChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Male', 'Female'],
-      datasets: [
-        {
-          data: [male, female],
-          backgroundColor: ['#10b981', '#fb7185'],
-          borderWidth: 0,
-          borderRadius: 10,
-          hoverOffset: 10,
-        },
-      ],
-    },
-    options: {
-      cutout: '80%',
-      plugins: { legend: { display: false } },
-      animation: { animateRotate: true, duration: 2000 },
-    },
-  });
+// --- Statistics Update Function ---
+function updateDashboardUI(male, female, working, nonWorking) {
+  const totalStudents = allStudents.length;
+
+  // 1. Update Employment Stats
+  const totalEmp = working + nonWorking;
+  const workingPerc = totalEmp > 0 ? Math.round((working / totalEmp) * 100) : 0;
+  const nonWorkingPerc =
+    totalEmp > 0 ? Math.round((nonWorking / totalEmp) * 100) : 0;
+
+  // Progress Bars
+  const workingBar = document.getElementById('workingProgressBar');
+  const nonWorkingBar = document.getElementById('nonWorkingProgressBar');
+  if (workingBar) workingBar.style.width = `${workingPerc}%`;
+  if (nonWorkingBar) nonWorkingBar.style.width = `${nonWorkingPerc}%`;
+
+  // Labels & Counts
+  document.getElementById('workingPercentLabel').textContent =
+    `${workingPerc}%`;
+  document.getElementById('nonWorkingPercentLabel').textContent =
+    `${nonWorkingPerc}%`;
+  document.getElementById('workingCount').textContent = working;
+  document.getElementById('nonWorkingCount').textContent = nonWorking;
+
+  // 2. Update Gender Counts
+  document.getElementById('maleCount').textContent = male;
+  document.getElementById('femaleCount').textContent = female;
+
+  // 3. Overall Total
+  document.getElementById('totalRegisteredCount').textContent = totalStudents;
 }
 
-// --- Data Fetching & Sync ---
+// --- Data Fetching & Real-time Sync ---
 function fetchStudents() {
   const studentRef = ref(database, 'students');
 
   onValue(studentRef, (snapshot) => {
     allStudents = [];
-    let maleCounter = 0;
-    let femaleCounter = 0;
+    let maleCount = 0;
+    let femaleCount = 0;
+    let workingCount = 0;
+    let nonWorkingCount = 0;
 
     if (snapshot.exists()) {
       snapshot.forEach((childSnapshot) => {
         const student = childSnapshot.val();
         allStudents.push({ id: childSnapshot.key, ...student });
 
+        // Logic for Gender
         const gender = (student.gender || '').toLowerCase();
-        if (gender === 'male') maleCounter++;
-        else if (gender === 'female') femaleCounter++;
+        if (gender === 'male') maleCount++;
+        else if (gender === 'female') femaleCount++;
+
+        // Logic for Employment (Working Student)
+        if (student.workingStudent === 'Yes') {
+          workingCount++;
+        } else {
+          nonWorkingCount++;
+        }
       });
     }
 
-    // Sort by newest
+    // Sort by latest
     allStudents.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-    // Update Text Displays
-    document.getElementById('totalRegisteredCount').textContent =
-      allStudents.length;
-    document.getElementById('maleCount').textContent = maleCounter;
-    document.getElementById('femaleCount').textContent = femaleCounter;
-
-    // Update Chart
-    if (!myDonutChart) {
-      initializeChart(maleCounter, femaleCounter);
-    } else {
-      myDonutChart.data.datasets[0].data = [maleCounter, femaleCounter];
-      myDonutChart.update();
-    }
-
+    // Update the Dashboard UI
+    updateDashboardUI(maleCount, femaleCount, workingCount, nonWorkingCount);
     renderTablePage();
   });
 }
 
-// Fetch PH Statistics (Separated if you want separate counters)
 function fetchPHStatistics() {
   const phRef = ref(database, 'studentsPH');
   onValue(phRef, (snapshot) => {
     let phTotal = 0;
-    let phMale = 0;
-    let phFemale = 0;
-
     if (snapshot.exists()) {
-      snapshot.forEach((child) => {
-        const data = child.val();
+      snapshot.forEach(() => {
         phTotal++;
-        const gender = (data.gender || '').toLowerCase();
-        if (gender === 'male') phMale++;
-        else if (gender === 'female') phFemale++;
       });
     }
-
-    document.getElementById('totalHandicapCount').textContent = phTotal;
-    document.getElementById('maleHandicapCount').textContent = phMale;
-    document.getElementById('femaleHandicapCount').textContent = phFemale;
+    const phEl = document.getElementById('totalHandicapCount');
+    if (phEl) phEl.textContent = phTotal;
   });
 }
 
@@ -143,10 +141,8 @@ async function handleFormSubmit(event, dbPath, formId, modalId) {
   submitBtn.disabled = true;
 
   const formData = {};
-  // Automatically collect all named inputs/selects
   form.querySelectorAll('input, select').forEach((el) => {
     if (el.id) {
-      // Mapping for PH fields if they have different IDs than the schema
       let key = el.id.replace('PH', '');
       formData[key] = el.value.trim();
     }
@@ -176,10 +172,12 @@ async function handleFormSubmit(event, dbPath, formId, modalId) {
     });
     form.reset();
     document.getElementById(modalId).classList.add('hidden');
+    document.body.style.overflow = 'auto';
   } catch (error) {
     Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+  } finally {
+    submitBtn.disabled = false;
   }
-  submitBtn.disabled = false;
 }
 
 // --- Initialization ---
@@ -201,6 +199,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderTablePage() {
-  // Logic to render rows in your table
-  console.log('Table Sync:', allStudents.length, 'students.');
+  console.log('Syncing Data... Current records:', allStudents.length);
 }

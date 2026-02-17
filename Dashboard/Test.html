@@ -1,0 +1,776 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>USM Management Dashboard</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link rel="stylesheet" href="./styling/Test.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#10b981', // Emerald-500
+              secondary: '#6366f1', // Indigo-500
+              accent: '#f59e0b', // Amber-500
+              'background-light': '#f8fafc',
+              'background-dark': '#020617',
+            },
+            fontFamily: {
+              display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+            },
+            borderRadius: {
+              '2xl': '1rem',
+              '3xl': '1.5rem',
+              '4xl': '2rem',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      .dark .glass-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .input-animated {
+        transition: all 0.2s ease-in-out;
+        border: 1.5px solid #e2e8f0;
+      }
+      .input-animated:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      }
+
+      .btn-hover-effect {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .btn-hover-effect:hover {
+        transform: translateY(-2px);
+        filter: brightness(110%);
+      }
+    </style>
+  </head>
+  <body
+    class="font-body bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300"
+  >
+    <div class="group [perspective:1000px]">
+      <div
+        class="relative w-28 h-28 p-2 rounded-full bg-gradient-to-br from-white to-slate-100 dark:from-slate-800 dark:to-slate-900 shadow-inner"
+      >
+        <canvas id="myDonutChart" class="relative z-10 rounded-full"></canvas>
+
+        <div
+          class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
+        >
+          <span class="text-[10px] font-bold text-slate-400">STATS</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex h-screen overflow-hidden">
+      <button
+        id="mobileMenuBtn"
+        class="lg:hidden fixed top-5 left-5 z-50 p-2 bg-white dark:bg-slate-800 shadow-lg rounded-xl text-emerald-600"
+      >
+        <span class="material-symbols-outlined">menu_open</span>
+      </button>
+
+      <aside
+        id="sidebar"
+        class="fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 dark:bg-slate-950 border-r border-white/5 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0"
+      >
+        <div class="p-8">
+          <div class="flex items-center gap-4 group cursor-pointer">
+            <div class="relative">
+              <div
+                class="absolute inset-0 bg-emerald-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
+              ></div>
+              <img
+                src="https://drive.google.com/thumbnail?id=1NkNgGZ8caLwKGleHzTVzzosEgOt4N7xl&sz=1000"
+                alt="USM Logo"
+                class="relative h-12 w-12 object-contain transition-transform duration-700 group-hover:rotate-[360deg]"
+              />
+            </div>
+            <div>
+              <h2
+                class="text-white font-bold tracking-tight text-xl font-display"
+              >
+                USM-KCC
+              </h2>
+              <span
+                class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest"
+              >
+                Management System
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="flex-1 px-4 mt-6 space-y-1.5 overflow-y-auto">
+          <p
+            class="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2"
+          >
+            Main Navigation
+          </p>
+
+          <button
+            type="button"
+            class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-400 hover:text-white hover:bg-emerald-600/10 hover:border-l-4 border-emerald-500 transition-all group"
+            id="toggleFormStudent"
+          >
+            <span
+              class="material-symbols-outlined group-hover:scale-110 transition-transform"
+            >
+              person_add
+            </span>
+            <span class="font-medium">Add Regular Student</span>
+          </button>
+
+          <button
+            id="toggleFormPH"
+            class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-400 hover:text-white hover:bg-indigo-600/10 hover:border-l-4 border-indigo-500 transition-all group"
+          >
+            <span
+              class="material-symbols-outlined group-hover:scale-110 transition-transform"
+            >
+              accessible_forward
+            </span>
+            <span class="font-medium">Add PH Student</span>
+          </button>
+        </nav>
+
+        <div class="p-6">
+          <button
+            id="logout"
+            class="w-full flex items-center justify-center space-x-2 px-4 py-3.5 bg-slate-800/50 hover:bg-rose-500/10 border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all duration-300"
+          >
+            <span class="material-symbols-outlined text-xl">logout</span>
+            <span class="font-bold text-sm uppercase tracking-wide">
+              Logout
+            </span>
+          </button>
+        </div>
+      </aside>
+
+      <main
+        class="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"
+      >
+        <div
+          id="sidebarOverlay"
+          class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 lg:hidden"
+        ></div>
+
+        <div class="flex-1 p-6 md:p-12 overflow-y-auto relative z-10">
+          <header
+            class="mb-10 animate-in fade-in slide-in-from-top-4 duration-700"
+          >
+            <h1
+              class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white font-display tracking-tight"
+            >
+              Dashboard
+              <span class="text-emerald-500 italic">Overview</span>
+            </h1>
+            <div class="h-1.5 w-20 bg-emerald-500 rounded-full mt-4"></div>
+          </header>
+
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div
+              class="glass-card group relative overflow-hidden rounded-4xl p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none"
+            >
+              <div
+                class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-700"
+              ></div>
+
+              <div class="flex justify-between items-center mb-10">
+                <div>
+                  <span
+                    class="px-3 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full"
+                  >
+                    Enrolled Database
+                  </span>
+                  <div class="flex items-baseline gap-3 mt-4">
+                    <p
+                      id="totalRegisteredCount"
+                      class="text-6xl font-black text-slate-900 dark:text-white tracking-tighter"
+                    >
+                      0
+                    </p>
+                    <span class="text-slate-400 font-medium">
+                      Total Students
+                    </span>
+                  </div>
+                </div>
+                <div class="relative h-24 w-24">
+                  <canvas id="myDonutChart"></canvas>
+                </div>
+              </div>
+
+              <div
+                class="grid grid-cols-2 gap-6 pt-8 border-t border-slate-100 dark:border-slate-800"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl text-emerald-600"
+                  >
+                    <span class="material-symbols-outlined">male</span>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">
+                      Males
+                    </p>
+                    <p
+                      id="maleCount"
+                      class="text-2xl font-black text-slate-800 dark:text-white"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="p-3 bg-rose-100 dark:bg-rose-900/30 rounded-2xl text-rose-600"
+                  >
+                    <span class="material-symbols-outlined">female</span>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">
+                      Females
+                    </p>
+                    <p
+                      id="femaleCount"
+                      class="text-2xl font-black text-slate-800 dark:text-white"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-10">
+                <a
+                  href="/Dashboard/Student/StudentGet.html"
+                  class="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold transition-all hover:shadow-xl hover:shadow-emerald-500/20 active:scale-95"
+                >
+                  <span>Explore Records</span>
+                  <span class="material-symbols-outlined text-sm">
+                    arrow_forward
+                  </span>
+                </a>
+              </div>
+            </div>
+
+            <div
+              class="glass-card group relative overflow-hidden rounded-4xl p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none"
+            >
+              <div
+                class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700"
+              ></div>
+
+              <div class="flex justify-between items-center mb-10">
+                <div>
+                  <span
+                    class="px-3 py-1 bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-full"
+                  >
+                    Accessibility Data
+                  </span>
+                  <div class="flex items-baseline gap-3 mt-4">
+                    <p
+                      id="totalHandicapCount"
+                      class="text-6xl font-black text-slate-900 dark:text-white tracking-tighter"
+                    >
+                      0
+                    </p>
+                    <span class="text-slate-400 font-medium">
+                      PWD Registered
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl rotate-12 flex items-center justify-center shadow-lg shadow-indigo-500/30"
+                >
+                  <span
+                    class="material-symbols-outlined text-white text-4xl -rotate-12"
+                  >
+                    accessible_forward
+                  </span>
+                </div>
+              </div>
+
+              <div
+                class="grid grid-cols-2 gap-6 pt-8 border-t border-slate-100 dark:border-slate-800"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl text-indigo-600"
+                  >
+                    <span class="material-symbols-outlined">man</span>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">
+                      Males
+                    </p>
+                    <p
+                      id="maleHandicapCount"
+                      class="text-2xl font-black text-slate-800 dark:text-white"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl text-purple-600"
+                  >
+                    <span class="material-symbols-outlined">woman</span>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">
+                      Females
+                    </p>
+                    <p
+                      id="femaleHandicapCount"
+                      class="text-2xl font-black text-slate-800 dark:text-white"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-10">
+                <a
+                  href="#"
+                  class="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-white rounded-2xl font-bold transition-all hover:shadow-xl active:scale-95"
+                >
+                  <span>View PWD List</span>
+                  <span class="material-symbols-outlined text-sm">
+                    arrow_forward
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="modalWrapper"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto"
+    >
+      <form
+        id="studentForm"
+        class="w-full max-w-2xl my-auto p-10 bg-white dark:bg-slate-900 shadow-3xl rounded-4xl transition-all scale-100"
+      >
+        <div class="flex justify-between items-center mb-8">
+          <h2
+            class="text-2xl font-black text-slate-900 dark:text-white font-display uppercase tracking-tight"
+          >
+            Student Details
+          </h2>
+          <div
+            class="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-full"
+          >
+            <span class="material-symbols-outlined">school</span>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="group">
+            <label
+              for="name"
+              class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+            >
+              Full Identity
+            </label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Juan Dela Cruz"
+              class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="year"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Academic Year
+              </label>
+              <select
+                id="year"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="1ST YEAR">1ST YEAR</option>
+                <option value="2ND YEAR">2ND YEAR</option>
+                <option value="3RD YEAR">3RD YEAR</option>
+                <option value="4TH YEAR">4TH YEAR</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="address"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Current Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                placeholder="Brgy. Poblacion"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label
+                for="gender"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="major"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Major
+              </label>
+              <input
+                type="text"
+                id="major"
+                placeholder="CS"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+            <div>
+              <label
+                for="program"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Program
+              </label>
+              <input
+                type="text"
+                id="program"
+                placeholder="BSIT"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="ip"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Ethnicity
+              </label>
+              <input
+                type="text"
+                id="ip"
+                placeholder="e.g. Teduray"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+            <div>
+              <label
+                for="workingStudent"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Employment
+              </label>
+              <select
+                id="workingStudent"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="No">Not Working</option>
+                <option value="Yes">Working Student</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="contactNumber"
+              class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+            >
+              Contact Number
+            </label>
+            <input
+              type="tel"
+              id="contactNumber"
+              pattern="[0-9]{11}"
+              placeholder="09XXXXXXXXX"
+              required
+              class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 input-animated dark:text-white outline-none"
+            />
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <button
+              type="submit"
+              class="flex-1 bg-emerald-600 text-white font-black py-4 px-6 rounded-2xl btn-hover-effect shadow-xl shadow-emerald-600/20 order-2 sm:order-1"
+            >
+              SAVE STUDENT
+            </button>
+            <button
+              type="button"
+              id="studentFormBack"
+              class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold py-4 px-6 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors order-1 sm:order-2"
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div
+      id="modalPHWrapper"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto"
+    >
+      <form
+        id="studentPHForm"
+        class="w-full max-w-2xl my-auto p-10 bg-white dark:bg-slate-900 shadow-3xl rounded-4xl"
+      >
+        <div class="flex justify-between items-center mb-8">
+          <h2
+            class="text-2xl font-black text-indigo-600 font-display uppercase tracking-tight"
+          >
+            PWD Registration
+          </h2>
+          <div
+            class="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 rounded-full"
+          >
+            <span class="material-symbols-outlined">accessible_forward</span>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="group">
+            <label
+              for="namePH"
+              class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+            >
+              Full Identity
+            </label>
+            <input
+              type="text"
+              id="namePH"
+              placeholder="Juan Dela Cruz"
+              class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="yearPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Academic Year
+              </label>
+              <select
+                id="yearPH"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="1ST YEAR">1ST YEAR</option>
+                <option value="2ND YEAR">2ND YEAR</option>
+                <option value="3RD YEAR">3RD YEAR</option>
+                <option value="4TH YEAR">4TH YEAR</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="addressPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Current Address
+              </label>
+              <input
+                type="text"
+                id="addressPH"
+                placeholder="Brgy. Poblacion"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label
+                for="genderPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Gender
+              </label>
+              <select
+                id="genderPH"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="majorPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Major
+              </label>
+              <input
+                type="text"
+                id="majorPH"
+                placeholder="CS"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+            <div>
+              <label
+                for="programPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Program
+              </label>
+              <input
+                type="text"
+                id="programPH"
+                placeholder="BSIT"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="physicalHandicap"
+              class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+            >
+              Disability Type
+            </label>
+            <input
+              type="text"
+              id="physicalHandicap"
+              placeholder="e.g. Visual Impairment"
+              class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                for="ipPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Ethnicity
+              </label>
+              <input
+                type="text"
+                id="ipPH"
+                placeholder="e.g. Teduray"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              />
+            </div>
+            <div>
+              <label
+                for="workingStudentPH"
+                class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+              >
+                Employment
+              </label>
+              <select
+                id="workingStudentPH"
+                class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+              >
+                <option value="No">Not Working</option>
+                <option value="Yes">Working Student</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="contactNumberPH"
+              class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"
+            >
+              Contact Number
+            </label>
+            <input
+              type="tel"
+              id="contactNumberPH"
+              pattern="[0-9]{11}"
+              placeholder="09XXXXXXXXX"
+              required
+              class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 input-animated dark:text-white outline-none"
+            />
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <button
+              type="submit"
+              class="flex-1 bg-indigo-600 text-white font-black py-4 px-6 rounded-2xl btn-hover-effect shadow-xl shadow-indigo-600/20 order-2 sm:order-1"
+            >
+              REGISTER PWD
+            </button>
+            <button
+              type="button"
+              id="studentFormPHBack"
+              class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold py-4 px-6 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors order-1 sm:order-2"
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script type="module" src="./Student/ModalStudentAdd.js"></script>
+  </body>
+</html>
