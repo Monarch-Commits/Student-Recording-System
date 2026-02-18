@@ -31,9 +31,8 @@ let allStudents = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
-// -------------------
-// 1. FETCH DATA (REALTIME)
-// -------------------
+//FETCH DATA (REALTIME)
+
 function fetchStudents() {
   const studentRef = ref(database, 'studentsPH');
 
@@ -49,12 +48,10 @@ function fetchStudents() {
       const studentId = childSnapshot.key;
       allStudents.push({ id: studentId, ...student });
 
-      // Gender counting using the correct DB key: genderPH
       const gender = (student.genderPH || '').toLowerCase();
       if (gender === 'male') maleCounter++;
       else if (gender === 'female') femaleCounter++;
 
-      // Working Student counting using: workingStudentPH
       if (student.workingStudentPH === 'Yes') workingCounter++;
     });
 
@@ -86,9 +83,7 @@ function updateDashboardStats(total, male, female, working) {
   }
 }
 
-// -------------------
-// 2. RENDER TABLE & FILTERING
-// -------------------
+// RENDER TABLE & FILTERING
 function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
@@ -150,9 +145,8 @@ function renderTablePage() {
   updatePaginationControls(totalItems);
 }
 
-// -------------------
-// 3. PAGINATION CONTROLS
-// -------------------
+// PAGINATION CONTROLS
+
 function updatePaginationControls(totalItems) {
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
@@ -185,9 +179,6 @@ function updatePaginationControls(totalItems) {
   nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
 }
 
-// -------------------
-// 4. EVENT LISTENERS
-// -------------------
 if (genderFilter) {
   genderFilter.addEventListener('change', () => {
     currentPage = 1;
@@ -214,9 +205,8 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
-// -------------------
-// 5. CRUD OPERATIONS
-// -------------------
+// CRUD OPERATIONS
+
 window.deleteStudent = function (id) {
   Swal.fire({
     title: 'Delete Student?',
@@ -244,7 +234,6 @@ window.editStudent = async function (id) {
     document.getElementById('modalWrapper').classList.remove('hidden');
     document.getElementById('studentId').value = id;
 
-    // Fixed Mapping: IDs in HTML have "PH" suffix
     const fields = [
       'namePH',
       'genderPH',
@@ -276,7 +265,6 @@ document
     e.preventDefault();
     const id = document.getElementById('studentId').value;
 
-    // Fixed: Get values using the correct IDs from HTML (e.g., namePH instead of name)
     const studentData = {
       namePH: document.getElementById('namePH').value,
       genderPH: document.getElementById('genderPH').value,
@@ -307,7 +295,7 @@ document
     }
   });
 
-// Modal UI Logic
+// Modal
 document.getElementById('studentFormBack').addEventListener('click', () => {
   document.getElementById('modalWrapper').classList.add('hidden');
 });

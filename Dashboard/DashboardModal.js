@@ -9,11 +9,11 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { firebaseConfig } from '../firebaseConfig.js';
 
-// --- 1. INITIALIZE FIREBASE ---
+//  INITIALIZE FIREBASE
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// --- 2. SIDEBAR & MODAL LOGIC ---
+// SIDEBAR & MODAL LOGIC
 const mobileBtn = document.getElementById('mobileMenuBtn');
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
@@ -44,7 +44,7 @@ const setupModal = (openBtnId, modalId, closeBtnId) => {
 setupModal('toggleFormStudent', 'modalWrapper', 'studentFormBack');
 setupModal('toggleFormPH', 'modalPHWrapper', 'studentFormPHBack');
 
-// --- 3. HELPER FUNCTIONS ---
+//  HELPER FUNCTIONS
 function updateText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -55,7 +55,7 @@ function updateBar(id, percent) {
   if (el) el.style.width = `${percent}%`;
 }
 
-// --- 4. STATISTICS UPDATE LOGIC (FIXED) ---
+// STATISTICS UPDATE LOGIC (FIXED)
 function updateStatsUI(snapshot, type) {
   let male = 0,
     female = 0,
@@ -110,14 +110,12 @@ function updateStatsUI(snapshot, type) {
   }
 }
 
-// --- 5. DATA SYNC ---
+// DATA SYNC
 function initDataSync() {
-  // Kinukuha ang data mula sa magkaibang nodes sa Firebase
   onValue(ref(database, 'students'), (snap) => updateStatsUI(snap, 'REG'));
   onValue(ref(database, 'studentsPH'), (snap) => updateStatsUI(snap, 'PH'));
 }
 
-// --- 6. FORM SUBMISSION ---
 async function handleFormSubmit(event, dbPath, formId, modalId) {
   event.preventDefault();
   const form = document.getElementById(formId);
@@ -162,7 +160,6 @@ async function handleFormSubmit(event, dbPath, formId, modalId) {
   }
 }
 
-// --- 7. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
   initDataSync();
 

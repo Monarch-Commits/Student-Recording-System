@@ -33,9 +33,7 @@ let allStudents = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
-// -------------------
-// 1. FETCH DATA (REALTIME)
-// -------------------
+// FETCH DATA (REALTIME)
 function fetchStudents() {
   const studentRef = ref(database, 'students');
 
@@ -83,9 +81,7 @@ function updateDashboardStats(total, male, female, working) {
   }
 }
 
-// -------------------
-// 2. RENDER TABLE & FILTERING (INTEGRATED SEARCH)
-// -------------------
+// RENDER TABLE & FILTERING (INTEGRATED SEARCH)
 function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
@@ -93,7 +89,7 @@ function renderTablePage() {
   const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const selectedSearchKey = filterOption ? filterOption.value : 'all';
 
-  // STEP 1: Filter by Gender AND Search Input
+  //  Filter by Gender AND Search Input
   const filteredStudents = allStudents.filter((student) => {
     // Gender Filter logic
     const matchesGender =
@@ -109,7 +105,7 @@ function renderTablePage() {
         );
       } else {
         // Mapping search keys to object properties if necessary
-        const dbKey = selectedSearchKey.replace('PH', ''); // handles namePH -> name
+        const dbKey = selectedSearchKey.replace('PH', '');
         matchesSearch = String(student[dbKey] || '')
           .toLowerCase()
           .includes(searchValue);
@@ -119,11 +115,10 @@ function renderTablePage() {
     return matchesGender && matchesSearch;
   });
 
-  // STEP 2: Pagination Calculations based on FILTERED results
+  // Pagination Calculations based on FILTERED results
   const totalItems = filteredStudents.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
-  // Anti-bug: If search reduces pages, reset current page to 1
   if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
   const start = (currentPage - 1) * rowsPerPage;
@@ -160,9 +155,7 @@ function renderTablePage() {
   updatePaginationControls(totalItems);
 }
 
-// -------------------
-// 3. PAGINATION CONTROLS
-// -------------------
+// PAGINATION CONTROLS
 function updatePaginationControls(totalItems) {
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
@@ -195,9 +188,7 @@ function updatePaginationControls(totalItems) {
   nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
 }
 
-// -------------------
-// 4. EVENT LISTENERS
-// -------------------
+//  EVENT LISTENERS
 if (genderFilter)
   genderFilter.addEventListener('change', () => {
     currentPage = 1;
@@ -222,16 +213,11 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  // Use current logic to find max pages
-  const totalItems = tableBody.querySelectorAll('tr').length; // visual check or use the filter function
-  // Re-run the render check
+  const totalItems = tableBody.querySelectorAll('tr').length;
   renderTablePage();
-  // Note: Inside renderTablePage, the nextBtn.disabled state is already handled.
 });
 
-// -------------------
 // 5. CRUD OPERATIONS
-// -------------------
 window.deleteStudent = function (id) {
   Swal.fire({
     title: 'Delete Student?',
