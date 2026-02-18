@@ -73,3 +73,5 @@ loginForm.addEventListener('submit', async (e) => {
     });
   }
 });
+
+console.log(userCredential.user.uid);

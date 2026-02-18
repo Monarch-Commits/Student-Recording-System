@@ -11,10 +11,28 @@ import {
   push,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { firebaseConfig } from '../../firebaseConfig.js';
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+
+const auth = getAuth();
+
+// Only fetch students after auth state is confirmed
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log('Logged in UID:', user.uid);
+    fetchStudents(); // now safe to access DB
+  } else {
+    console.log('User not logged in.');
+    // Optionally redirect to login
+    window.location.href = '/login.html';
+  }
+});
 
 // DOM Elements
 const tableBody = document.getElementById('tableBody');
