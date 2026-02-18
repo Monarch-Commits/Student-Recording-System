@@ -6,45 +6,47 @@ document.addEventListener('DOMContentLoaded', function () {
   function performSearch() {
     const searchValue = searchInput.value.trim().toLowerCase();
     const selectedFilter = filterOption.value;
-
     const rows = tableBody.querySelectorAll('tr');
 
     rows.forEach((row) => {
       let cellValue = '';
 
+      // MATCHED EXACTLY to your <option value="">
       switch (selectedFilter) {
-        case 'name':
-          cellValue = row.cells[0]?.innerText.toLowerCase() || '';
-          break;
-        case 'year':
-          cellValue = row.cells[2]?.innerText.toLowerCase() || '';
+        case 'namePH':
+          cellValue = row.cells[0]?.innerText || '';
           break;
         case 'physical handicap':
-          cellValue = row.cells[2]?.innerText.toLowerCase() || '';
+          cellValue = row.cells[2]?.innerText || '';
           break;
-        case 'program':
-          cellValue = row.cells[3]?.innerText.toLowerCase() || '';
+        case 'yearPH':
+          cellValue = row.cells[3]?.innerText || '';
           break;
-        case 'major':
-          cellValue = row.cells[4]?.innerText.toLowerCase() || '';
+        case 'programPH':
+          cellValue = row.cells[4]?.innerText || '';
           break;
-        case 'ip':
-          cellValue = row.cells[5]?.innerText.toLowerCase() || '';
+        case 'majorPH':
+          cellValue = row.cells[5]?.innerText || '';
           break;
-        case 'workingStudent':
-          cellValue = row.cells[6]?.innerText.toLowerCase() || '';
+        case 'ipPH':
+          cellValue = row.cells[6]?.innerText || '';
           break;
-        case 'contact':
-          cellValue = row.cells[7]?.innerText.toLowerCase() || '';
+        case 'workingStudentPH':
+          cellValue = row.cells[7]?.innerText || '';
           break;
-        case 'address':
-          cellValue = row.cells[8]?.innerText.toLowerCase() || '';
+        case 'contactPH':
+          cellValue = row.cells[8]?.innerText || '';
+          break;
+        case 'addressPH':
+          cellValue = row.cells[9]?.innerText || '';
           break;
         default:
-          cellValue = row.innerText.toLowerCase();
+          cellValue = row.innerText;
       }
 
-      row.style.display = cellValue.includes(searchValue) ? '' : 'none';
+      row.style.display = cellValue.toLowerCase().includes(searchValue)
+        ? ''
+        : 'none';
     });
   }
 

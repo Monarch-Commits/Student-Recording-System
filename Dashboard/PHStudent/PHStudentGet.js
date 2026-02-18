@@ -1,4 +1,4 @@
-// import './SearchStudents.js';
+import './SearchPHStudents.js';
 import './ExportStudentsPHData.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
@@ -113,27 +113,27 @@ function renderTablePage() {
       'hover:bg-slate-50 transition-all duration-200 border-b border-slate-100';
 
     row.innerHTML = `
-      <td class="px-6 py-4">
+      <td class="px-6 py-4 even:bg-gray-50">
         <p class="text-sm font-semibold text-slate-900 truncate">${student.namePH || '-'}</p>
       </td>
-      <td class="px-4 py-4 text-sm text-center font-medium">
+      <td class="px-4 py-4 text-sm text-center font-medium even:bg-gray-50">
         <span class="${(student.genderPH || '').toLowerCase() === 'male' ? 'bg-emerald-200 text-emerald-800' : 'bg-pink-200 text-pink-800'} rounded-full px-2 py-1">
           ${student.genderPH || '-'}
         </span>
       </td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.physicalHandicap || '-'}</td> 
-      <td class="px-4 py-4 text-sm text-slate-600">${student.yearPH || '-'}</td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.programPH || '-'}</td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.majorPH || '-'}</td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.ipPH || '-'}</td>
-      <td class="px-4 py-4 text-center">
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.physicalHandicap || '-'}</td> 
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.yearPH || '-'}</td>
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.programPH || '-'}</td>
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.majorPH || '-'}</td>
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.ipPH || '-'}</td>
+      <td class="px-4 py-4 text-center even:bg-gray-50">
         <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase ${student.workingStudentPH === 'Yes' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
           ${student.workingStudentPH || 'No'}
         </span>
       </td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.contactNumberPH || '-'}</td>
-      <td class="px-4 py-4 text-sm text-slate-600">${student.addressPH || '-'}</td>
-      <td class="px-6 py-4 text-right">
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.contactNumberPH || '-'}</td>
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.addressPH || '-'}</td>
+      <td class="px-6 py-4 text-right even:bg-gray-50">
         <div class="flex justify-end gap-2">
           <button onclick="editStudent('${student.id}')" class="p-1.5 text-slate-400 hover:text-green-700">
             <span class="material-symbols-outlined text-xl">edit</span>
@@ -203,7 +203,7 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  const selected = genderFilter.value.toLowerCase();
+  const selected = (genderFilter ? genderFilter.value : 'all').toLowerCase();
   const filteredCount = allStudents.filter(
     (s) => selected === 'all' || (s.genderPH || '').toLowerCase() === selected,
   ).length;
@@ -244,29 +244,29 @@ window.editStudent = async function (id) {
     document.getElementById('modalWrapper').classList.remove('hidden');
     document.getElementById('studentId').value = id;
 
-    // Mapping Database PH keys to Form Input IDs
-    const fieldMapping = {
-      name: 'namePH',
-      gender: 'genderPH',
-      year: 'yearPH',
-      program: 'programPH',
-      major: 'majorPH',
-      ip: 'ipPH',
-      workingStudent: 'workingStudentPH',
-      contactNumber: 'contactNumberPH',
-      address: 'addressPH',
-      physicalHandicap: 'physicalHandicap',
-    };
+    // Fixed Mapping: IDs in HTML have "PH" suffix
+    const fields = [
+      'namePH',
+      'genderPH',
+      'yearPH',
+      'programPH',
+      'majorPH',
+      'ipPH',
+      'workingStudentPH',
+      'contactNumberPH',
+      'addressPH',
+      'physicalHandicap',
+    ];
 
-    Object.keys(fieldMapping).forEach((inputId) => {
-      const dbKey = fieldMapping[inputId];
-      const el = document.getElementById(inputId);
-      if (el) el.value = data[dbKey] || '';
+    fields.forEach((fieldId) => {
+      const el = document.getElementById(fieldId);
+      if (el) el.value = data[fieldId] || '';
     });
 
-    document.querySelector(
+    const submitBtn = document.querySelector(
       '#studentUpdateForm button[type="submit"]',
-    ).textContent = 'Update Student';
+    );
+    if (submitBtn) submitBtn.textContent = 'Update Student';
   }
 };
 
@@ -276,17 +276,17 @@ document
     e.preventDefault();
     const id = document.getElementById('studentId').value;
 
-    // Consistently using PH suffix for all database fields
+    // Fixed: Get values using the correct IDs from HTML (e.g., namePH instead of name)
     const studentData = {
-      namePH: document.getElementById('name').value,
-      genderPH: document.getElementById('gender').value,
-      yearPH: document.getElementById('year').value,
-      programPH: document.getElementById('program').value,
-      majorPH: document.getElementById('major').value,
-      ipPH: document.getElementById('ip').value,
-      workingStudentPH: document.getElementById('workingStudent').value,
-      contactNumberPH: document.getElementById('contactNumber').value,
-      addressPH: document.getElementById('address').value,
+      namePH: document.getElementById('namePH').value,
+      genderPH: document.getElementById('genderPH').value,
+      yearPH: document.getElementById('yearPH').value,
+      programPH: document.getElementById('programPH').value,
+      majorPH: document.getElementById('majorPH').value,
+      ipPH: document.getElementById('ipPH').value,
+      workingStudentPH: document.getElementById('workingStudentPH').value,
+      contactNumberPH: document.getElementById('contactNumberPH').value,
+      addressPH: document.getElementById('addressPH').value,
       physicalHandicap:
         document.getElementById('physicalHandicap')?.value || '',
       updatedAt: Date.now(),
@@ -315,9 +315,10 @@ document.getElementById('studentFormBack').addEventListener('click', () => {
 document.getElementById('toggleFormStudent').addEventListener('click', () => {
   document.getElementById('studentUpdateForm').reset();
   document.getElementById('studentId').value = '';
-  document.querySelector(
+  const submitBtn = document.querySelector(
     '#studentUpdateForm button[type="submit"]',
-  ).textContent = 'Add Student';
+  );
+  if (submitBtn) submitBtn.textContent = 'Add Student';
   document.getElementById('modalWrapper').classList.remove('hidden');
 });
 

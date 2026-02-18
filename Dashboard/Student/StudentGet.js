@@ -25,6 +25,8 @@ const pageStart = document.getElementById('pageStart');
 const pageEnd = document.getElementById('pageEnd');
 const totalEntries = document.getElementById('totalEntries');
 const genderFilter = document.getElementById('genderFilter');
+const searchInput = document.getElementById('searchInput'); // Dagdag para sa search-aware pagination
+const filterOption = document.getElementById('filterOption'); // Dagdag para sa search-aware pagination
 
 // Pagination & Data State
 let allStudents = [];
@@ -39,8 +41,6 @@ function fetchStudents() {
 
   onValue(studentRef, (snapshot) => {
     allStudents = [];
-
-    // Counters for Dashboard
     let maleCounter = 0;
     let femaleCounter = 0;
     let workingCounter = 0;
@@ -50,19 +50,14 @@ function fetchStudents() {
       const studentId = childSnapshot.key;
       allStudents.push({ id: studentId, ...student });
 
-      // Gender counting (Exact)
       const gender = (student.gender || '').toLowerCase();
       if (gender === 'male') maleCounter++;
       else if (gender === 'female') femaleCounter++;
-
-      // Working Student counting
       if (student.workingStudent === 'Yes') workingCounter++;
     });
 
-    // Sort: Latest entries first
     allStudents.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-    // Update Dashboard UI
     updateDashboardStats(
       allStudents.length,
       maleCounter,
@@ -70,7 +65,6 @@ function fetchStudents() {
       workingCounter,
     );
 
-    // Initial render
     renderTablePage();
   });
 }
@@ -90,21 +84,48 @@ function updateDashboardStats(total, male, female, working) {
 }
 
 // -------------------
-// 2. RENDER TABLE & FILTERING
+// 2. RENDER TABLE & FILTERING (INTEGRATED SEARCH)
 // -------------------
 function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
     : 'all';
+  const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const selectedSearchKey = filterOption ? filterOption.value : 'all';
 
-  // Apply Exact Gender Filter
+  // STEP 1: Filter by Gender AND Search Input
   const filteredStudents = allStudents.filter((student) => {
-    if (selectedGender === 'all') return true;
-    return (student.gender || '').toLowerCase() === selectedGender;
+    // Gender Filter logic
+    const matchesGender =
+      selectedGender === 'all' ||
+      (student.gender || '').toLowerCase() === selectedGender;
+
+    // Search Filter logic
+    let matchesSearch = true;
+    if (searchValue) {
+      if (selectedSearchKey === 'all') {
+        matchesSearch = Object.values(student).some((val) =>
+          String(val).toLowerCase().includes(searchValue),
+        );
+      } else {
+        // Mapping search keys to object properties if necessary
+        const dbKey = selectedSearchKey.replace('PH', ''); // handles namePH -> name
+        matchesSearch = String(student[dbKey] || '')
+          .toLowerCase()
+          .includes(searchValue);
+      }
+    }
+
+    return matchesGender && matchesSearch;
   });
 
-  // Pagination Calculations
+  // STEP 2: Pagination Calculations based on FILTERED results
   const totalItems = filteredStudents.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+  // Anti-bug: If search reduces pages, reset current page to 1
+  if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
   const paginatedItems = filteredStudents.slice(start, end);
@@ -117,7 +138,21 @@ function renderTablePage() {
       'hover:bg-slate-50 transition-all duration-200 border-b border-slate-100';
 
     row.innerHTML = `
-     <td class="px-6 py-4 even:bg-gray-50"> <div class="flex items-center gap-3"> <div> <p class="text-sm font-semibold text-slate-900 truncate">${student.name}</p> </div> </div> </td> <td class="px-4 py-4 text-sm text-center even:bg-gray-50 font-medium"> <span class="${(student.gender || '').toLowerCase() === 'male' ? 'bg-emerald-200 text-emerald-800 rounded-full px-2 py-1' : 'bg-pink-200 text-pink-800 rounded-full px-2 py-1'}"> ${student.gender || '-'} </span> </td> <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.year}</td> <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.program}</td> <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.major}</td> <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.ip}</td> <td class="px-4 py-4 text-center even:bg-gray-50"> <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase transition-all duration-300 ${student.workingStudent === 'Yes' ? 'bg-emerald-100/50 text-emerald-800 backdrop-blur-sm shadow-sm' : 'bg-red-200 text-slate-700 backdrop-blur-sm shadow-sm'}"> ${student.workingStudent} </span> </td> <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.contactNumber || '-'}</td> <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.address || '-'}</td> <td class="px-6 py-4 text-right even:bg-gray-50"> <div class="flex justify-end gap-2"> <button onclick="editStudent('${student.id}')" class="p-1.5 text-slate-400 hover:text-primary"> <span class="material-symbols-outlined hover:text-green-900 text-xl">edit</span> </button> <button onclick="deleteStudent('${student.id}')" class="p-1.5 text-slate-400 hover:text-red-500"> <span class="material-symbols-outlined text-xl">delete</span> </button> </div> </td>
+      <td class="px-6 py-4"> <p class="text-sm font-semibold text-slate-900 truncate even:bg-gray-50">${student.name}</p> </td> 
+      <td class="px-4 py-4 text-sm text-center font-medium even:bg-gray-50"> <span class="${(student.gender || '').toLowerCase() === 'male' ? 'bg-emerald-200 text-emerald-800' : 'bg-pink-200 text-pink-800'} rounded-full px-2 py-1"> ${student.gender || '-'} </span> </td> 
+      <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.year}</td> 
+      <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.program}</td> 
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.major}</td> 
+      <td class="px-4 py-4 text-sm text-slate-600 whitespace-nowrap even:bg-gray-50">${student.ip}</td> 
+      <td class="px-4 py-4 text-center even:bg-gray-50"> <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${student.workingStudent === 'Yes' ? 'bg-emerald-100/50 text-emerald-800' : 'bg-red-200 text-slate-700'}"> ${student.workingStudent} </span> </td> 
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.contactNumber || '-'}</td> 
+      <td class="px-4 py-4 text-sm text-slate-600 even:bg-gray-50">${student.address || '-'}</td> 
+      <td class="px-6 py-4 text-right even:bg-gray-50"> 
+        <div class="flex justify-end gap-2"> 
+          <button onclick="editStudent('${student.id}')" class="p-1.5 text-slate-400"> <span class="material-symbols-outlined hover:text-green-900 text-xl">edit</span> </button> 
+          <button onclick="deleteStudent('${student.id}')" class="p-1.5 text-slate-400 hover:text-red-500"> <span class="material-symbols-outlined text-xl">delete</span> </button> 
+        </div> 
+      </td>
     `;
     tableBody.appendChild(row);
   });
@@ -163,12 +198,21 @@ function updatePaginationControls(totalItems) {
 // -------------------
 // 4. EVENT LISTENERS
 // -------------------
-if (genderFilter) {
+if (genderFilter)
   genderFilter.addEventListener('change', () => {
     currentPage = 1;
     renderTablePage();
   });
-}
+if (searchInput)
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTablePage();
+  });
+if (filterOption)
+  filterOption.addEventListener('change', () => {
+    currentPage = 1;
+    renderTablePage();
+  });
 
 prevBtn.addEventListener('click', () => {
   if (currentPage > 1) {
@@ -178,15 +222,11 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  const filteredCount = allStudents.filter((s) => {
-    const sel = genderFilter.value.toLowerCase();
-    return sel === 'all' || (s.gender || '').toLowerCase() === sel;
-  }).length;
-
-  if (currentPage < Math.ceil(filteredCount / rowsPerPage)) {
-    currentPage++;
-    renderTablePage();
-  }
+  // Use current logic to find max pages
+  const totalItems = tableBody.querySelectorAll('tr').length; // visual check or use the filter function
+  // Re-run the render check
+  renderTablePage();
+  // Note: Inside renderTablePage, the nextBtn.disabled state is already handled.
 });
 
 // -------------------
@@ -273,7 +313,6 @@ document
     }
   });
 
-// Modal Logic
 document.getElementById('studentFormBack').addEventListener('click', () => {
   document.getElementById('modalWrapper').classList.add('hidden');
 });
@@ -287,5 +326,4 @@ document.getElementById('toggleFormStudent').addEventListener('click', () => {
   document.getElementById('modalWrapper').classList.remove('hidden');
 });
 
-// Start the app
 fetchStudents();

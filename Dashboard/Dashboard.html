@@ -67,7 +67,7 @@
     </style>
   </head>
   <body
-    class="font-body bg-gradient-to-br from-yellow-60 to-yellow-50 transition-all duration-500"
+    class="font-body bg-gradient-to-br h-screen from-yellow-60 to-yellow-50 transition-all duration-500"
   >
     <div class="flex h-screen overflow-hidden relative">
       <button
@@ -123,7 +123,7 @@
         <div class="p-6 border-t border-white/5">
           <button
             id="logout"
-            class="w-full flex items-center justify-center space-x-2 px-4 py-3 border border-slate-500 text-slate-400 hover:text-red-400 hover:border-red-400 rounded-xl transition-all duration-200"
+            class="w-full flex items-center justify-center space-x-2 px-4 py-3 border border-slate-500 text-white hover:text-red-400 hover:border-red-400 rounded-xl transition-all duration-200"
           >
             <span class="material-symbols-outlined text-xl">logout</span>
             <span class="font-medium">Logout</span>
@@ -232,7 +232,7 @@
                       </span>
                       <span
                         id="nonWorkingPercentLabel"
-                        class="text-xs font-black text-white bg-slate-600 px-2.5 py-1 rounded-md"
+                        class="text-xs font-black text-white bg-yellow-600 px-2.5 py-1 rounded-md"
                       >
                         0%
                       </span>
@@ -242,7 +242,7 @@
                     >
                       <div
                         id="nonWorkingProgressBar"
-                        class="bg-slate-600 h-full rounded-full transition-all duration-1000 ease-out"
+                        class="bg-yellow-400 h-full rounded-full transition-all duration-1000 ease-out"
                         style="width: 0%"
                       ></div>
                     </div>
@@ -348,7 +348,7 @@
                   </h3>
                   <div class="flex items-center gap-4">
                     <p
-                      id="totalRegisteredCount"
+                      id="totalHandicapCount"
                       class="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none"
                     >
                       0
@@ -380,7 +380,7 @@
                         Working Students
                       </span>
                       <span
-                        id="workingPercentLabel"
+                        id="PHworkingPercentLabel"
                         class="text-xs font-black text-white bg-emerald-600 px-2.5 py-1 rounded-md"
                       >
                         0%
@@ -390,14 +390,17 @@
                       class="w-full bg-slate-300 h-3 rounded-full overflow-hidden"
                     >
                       <div
-                        id="workingProgressBar"
+                        id="PHworkingProgressBar"
                         class="bg-emerald-600 h-full rounded-full transition-all duration-1000 ease-out shadow-sm"
                         style="width: 0%"
                       ></div>
                     </div>
                     <p class="text-xs text-slate-600 font-bold">
                       Total Count:
-                      <span id="workingCount" class="text-emerald-700 text-sm">
+                      <span
+                        id="PHworkingCount"
+                        class="text-emerald-700 text-sm"
+                      >
                         0
                       </span>
                     </p>
@@ -409,8 +412,8 @@
                         Non-Working Students
                       </span>
                       <span
-                        id="nonWorkingPercentLabel"
-                        class="text-xs font-black text-white bg-slate-600 px-2.5 py-1 rounded-md"
+                        id="PHnonWorkingPercentLabel"
+                        class="text-xs font-black text-white bg-yellow-600 px-2.5 py-1 rounded-md"
                       >
                         0%
                       </span>
@@ -419,14 +422,17 @@
                       class="w-full bg-slate-300 h-3 rounded-full overflow-hidden"
                     >
                       <div
-                        id="nonWorkingProgressBar"
-                        class="bg-slate-600 h-full rounded-full transition-all duration-1000 ease-out"
+                        id="PHnonWorkingProgressBar"
+                        class="bg-yellow-400 h-full rounded-full transition-all duration-1000 ease-out"
                         style="width: 0%"
                       ></div>
                     </div>
                     <p class="text-xs text-slate-600 font-bold">
                       Total Count:
-                      <span id="nonWorkingCount" class="text-slate-900 text-sm">
+                      <span
+                        id="PHnonWorkingCount"
+                        class="text-slate-900 text-sm"
+                      >
                         0
                       </span>
                     </p>
@@ -455,7 +461,7 @@
                         Males
                       </p>
                       <p
-                        id="maleCount"
+                        id="PHmaleCount"
                         class="text-4xl font-black text-slate-900 tracking-tight"
                       >
                         0
@@ -482,7 +488,7 @@
                         Females
                       </p>
                       <p
-                        id="femaleCount"
+                        id="PHfemaleCount"
                         class="text-4xl font-black text-slate-900 tracking-tight"
                       >
                         0
@@ -658,7 +664,7 @@
         </div>
 
         <!-- FIXED FOOTER BUTTONS -->
-        <div class="px-6 py-4 border-t border-gray-100 bg-white">
+        <div class="px-6 pb-10 sm:pb:0 border-t border-gray-100 bg-white">
           <div class="flex flex-col sm:flex-row gap-4">
             <button
               type="submit"
@@ -709,7 +715,6 @@
             />
           </div>
 
-          <!-- Year + Address -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label class="block text-sm font-semibold text-gray-600 mb-2">
@@ -739,7 +744,6 @@
             </div>
           </div>
 
-          <!-- Gender / Major / Program -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label class="block text-sm font-semibold text-gray-600 mb-2">
@@ -837,7 +841,7 @@
         </div>
 
         <!-- FIXED FOOTER -->
-        <div class="px-6 py-4 border-t border-gray-100 bg-white">
+        <div class="px-6 pb-10 sm:pb:0 py-4 border-t border-gray-100 bg-white">
           <div class="flex flex-col sm:flex-row gap-4">
             <button
               type="submit"
@@ -858,6 +862,6 @@
       </form>
     </div>
 
-    <script type="module" src="./Student/ModalStudentAdd.js"></script>
+    <script type="module" src="./DashboardModal.js"></script>
   </body>
 </html>
