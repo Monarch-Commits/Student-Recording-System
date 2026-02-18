@@ -22,15 +22,13 @@ const database = getDatabase(app);
 
 const auth = getAuth();
 
-// Only fetch students after auth state is confirmed
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log('Logged in UID:', user.uid);
-    fetchStudents(); // now safe to access DB
+    fetchStudents();
   } else {
     console.log('User not logged in.');
-    // Optionally redirect to login
-    window.location.href = '/login.html';
+    window.location.href = '/index.html';
   }
 });
 

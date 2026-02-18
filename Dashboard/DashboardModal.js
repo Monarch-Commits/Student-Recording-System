@@ -8,10 +8,26 @@ import {
   onValue,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { firebaseConfig } from '../firebaseConfig.js';
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 //  INITIALIZE FIREBASE
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+
+const auth = getAuth();
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log('Logged in UID:', user.uid);
+    fetchStudents();
+  } else {
+    console.log('User not logged in.');
+    window.location.href = '/index.html';
+  }
+});
 
 // SIDEBAR & MODAL LOGIC
 const mobileBtn = document.getElementById('mobileMenuBtn');
