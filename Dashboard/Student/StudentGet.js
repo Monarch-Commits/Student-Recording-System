@@ -228,8 +228,15 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  const totalItems = tableBody.querySelectorAll('tr').length;
-  renderTablePage();
+  const selected = (genderFilter ? genderFilter.value : 'all').toLowerCase();
+  const filteredCount = allStudents.filter(
+    (s) => selected === 'all' || (s.gender || '').toLowerCase() === selected,
+  ).length;
+
+  if (currentPage < Math.ceil(filteredCount / rowsPerPage)) {
+    currentPage++;
+    renderTablePage();
+  }
 });
 
 // 5. CRUD OPERATIONS
