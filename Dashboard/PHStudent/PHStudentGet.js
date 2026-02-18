@@ -19,7 +19,6 @@ import {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-
 const auth = getAuth();
 
 onAuthStateChanged(auth, (user) => {
@@ -33,6 +32,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // DOM Elements
+const searchInput = document.getElementById('searchInput'); // Kinukuha ang search bar
 const tableBody = document.getElementById('tableBody');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -47,8 +47,7 @@ let allStudents = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
-//FETCH DATA (REALTIME)
-
+// FETCH DATA (REALTIME)
 function fetchStudents() {
   const studentRef = ref(database, 'studentsPH');
 
@@ -104,11 +103,23 @@ function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
     : 'all';
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
-  // Apply Gender Filter using the correct DB key: genderPH
+  // DITO ANG FIX: Isinasama ang Search Term sa filtering para tumama ang pagination
   const filteredStudents = allStudents.filter((student) => {
-    if (selectedGender === 'all') return true;
-    return (student.genderPH || '').toLowerCase() === selectedGender;
+    const matchesGender =
+      selectedGender === 'all' ||
+      (student.genderPH || '').toLowerCase() === selectedGender;
+
+    // I-search sa mahahalagang fields
+    const matchesSearch =
+      (student.namePH || '').toLowerCase().includes(searchTerm) ||
+      (student.yearPH || '').toLowerCase().includes(searchTerm) ||
+      (student.programPH || '').toLowerCase().includes(searchTerm) ||
+      (student.majorPH || '').toLowerCase().includes(searchTerm) ||
+      (student.addressPH || '').toLowerCase().includes(searchTerm);
+
+    return matchesGender && matchesSearch;
   });
 
   const totalItems = filteredStudents.length;
@@ -162,7 +173,6 @@ function renderTablePage() {
 }
 
 // PAGINATION CONTROLS
-
 function updatePaginationControls(totalItems) {
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
@@ -195,8 +205,17 @@ function updatePaginationControls(totalItems) {
   nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
 }
 
+// LISTENERS
 if (genderFilter) {
   genderFilter.addEventListener('change', () => {
+    currentPage = 1;
+    renderTablePage();
+  });
+}
+
+// FIX: Mag-re-render ang table habang nagta-type sa search bar
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
     currentPage = 1;
     renderTablePage();
   });
@@ -211,9 +230,16 @@ prevBtn.addEventListener('click', () => {
 
 nextBtn.addEventListener('click', () => {
   const selected = (genderFilter ? genderFilter.value : 'all').toLowerCase();
-  const filteredCount = allStudents.filter(
-    (s) => selected === 'all' || (s.genderPH || '').toLowerCase() === selected,
-  ).length;
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+  const filteredCount = allStudents.filter((s) => {
+    const mg =
+      selected === 'all' || (s.genderPH || '').toLowerCase() === selected;
+    const ms =
+      (s.namePH || '').toLowerCase().includes(searchTerm) ||
+      (s.yearPH || '').toLowerCase().includes(searchTerm);
+    return mg && ms;
+  }).length;
 
   if (currentPage < Math.ceil(filteredCount / rowsPerPage)) {
     currentPage++;
@@ -222,7 +248,6 @@ nextBtn.addEventListener('click', () => {
 });
 
 // CRUD OPERATIONS
-
 window.deleteStudent = function (id) {
   Swal.fire({
     title: 'Delete Student?',
@@ -311,7 +336,7 @@ document
     }
   });
 
-// Modal
+// Modal Logic
 document.getElementById('studentFormBack').addEventListener('click', () => {
   document.getElementById('modalWrapper').classList.add('hidden');
 });
