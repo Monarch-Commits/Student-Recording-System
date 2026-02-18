@@ -1,5 +1,5 @@
 export const firebaseConfig = {
-  apiKey: 'AIzaSyDyIQnXt9wEIuzRMDtIuB9S_uMYboZ5NA0',
+  apiKey: 'AIzaSyCE-x32r_GgVYitVnCCLD5_rXkzKWqkz38',
   authDomain: 'student-recording-101.firebaseapp.com',
   projectId: 'student-recording-101',
   storageBucket: 'student-recording-101.firebasestorage.app',
