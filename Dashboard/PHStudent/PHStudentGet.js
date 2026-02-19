@@ -21,6 +21,24 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
 
+// DOM Elements
+const tableBody = document.getElementById('tableBody');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageContainer = document.getElementById('pageContainer');
+const pageStart = document.getElementById('pageStart');
+const pageEnd = document.getElementById('pageEnd');
+const totalEntries = document.getElementById('totalEntries');
+const genderFilter = document.getElementById('genderFilter');
+const searchInput = document.getElementById('searchInput'); // Siguraduhing may ID na ganito sa HTML
+const filterOption = document.getElementById('filterOption'); // Siguraduhing may ID na ganito sa HTML
+
+// Pagination & Data State
+let allStudents = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+
+// AUTH & REALTIME FETCH
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log('Logged in UID:', user.uid);
@@ -31,29 +49,11 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// DOM Elements
-const searchInput = document.getElementById('searchInput'); // Kinukuha ang search bar
-const tableBody = document.getElementById('tableBody');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const pageContainer = document.getElementById('pageContainer');
-const pageStart = document.getElementById('pageStart');
-const pageEnd = document.getElementById('pageEnd');
-const totalEntries = document.getElementById('totalEntries');
-const genderFilter = document.getElementById('genderFilter');
-
-// Pagination & Data State
-let allStudents = [];
-let currentPage = 1;
-const rowsPerPage = 10;
-
-// FETCH DATA (REALTIME)
 function fetchStudents() {
   const studentRef = ref(database, 'studentsPH');
 
   onValue(studentRef, (snapshot) => {
     allStudents = [];
-
     let maleCounter = 0;
     let femaleCounter = 0;
     let workingCounter = 0;
@@ -66,7 +66,6 @@ function fetchStudents() {
       const gender = (student.genderPH || '').toLowerCase();
       if (gender === 'male') maleCounter++;
       else if (gender === 'female') femaleCounter++;
-
       if (student.workingStudentPH === 'Yes') workingCounter++;
     });
 
@@ -79,7 +78,6 @@ function fetchStudents() {
       femaleCounter,
       workingCounter,
     );
-
     renderTablePage();
   });
 }
@@ -91,33 +89,66 @@ function updateDashboardStats(total, male, female, working) {
     femaleCount: female,
     workingCount: working,
   };
-
   for (const [id, value] of Object.entries(displays)) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   }
 }
 
-// RENDER TABLE & FILTERING
+// RENDER TABLE & FILTERING (INTEGRATED SEARCH)
 function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
     : 'all';
-  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+  const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const selectedField = filterOption ? filterOption.value : 'all';
 
-  // DITO ANG FIX: Isinasama ang Search Term sa filtering para tumama ang pagination
+  // COMBINED FILTERING LOGIC
   const filteredStudents = allStudents.filter((student) => {
+    // 1. Gender Filter
     const matchesGender =
       selectedGender === 'all' ||
       (student.genderPH || '').toLowerCase() === selectedGender;
 
-    // I-search sa mahahalagang fields
-    const matchesSearch =
-      (student.namePH || '').toLowerCase().includes(searchTerm) ||
-      (student.yearPH || '').toLowerCase().includes(searchTerm) ||
-      (student.programPH || '').toLowerCase().includes(searchTerm) ||
-      (student.majorPH || '').toLowerCase().includes(searchTerm) ||
-      (student.addressPH || '').toLowerCase().includes(searchTerm);
+    // 2. Search Filter (Base sa napiling field sa dropdown)
+    let fieldValue = '';
+    switch (selectedField) {
+      case 'namePH':
+        fieldValue = student.namePH;
+        break;
+      case 'physical handicap':
+        fieldValue = student.physicalHandicap;
+        break;
+      case 'yearPH':
+        fieldValue = student.yearPH;
+        break;
+      case 'programPH':
+        fieldValue = student.programPH;
+        break;
+      case 'majorPH':
+        fieldValue = student.majorPH;
+        break;
+      case 'ipPH':
+        fieldValue = student.ipPH;
+        break;
+      case 'workingStudentPH':
+        fieldValue = student.workingStudentPH;
+        break;
+      case 'contactPH':
+        fieldValue = student.contactNumberPH;
+        break;
+      case 'addressPH':
+        fieldValue = student.addressPH;
+        break;
+      default:
+        // Isasama lahat ng fields kapag "All" o default
+        fieldValue = `${student.namePH} ${student.programPH} ${student.addressPH} ${student.physicalHandicap}`;
+    }
+
+    const matchesSearch = (fieldValue || '')
+      .toString()
+      .toLowerCase()
+      .includes(searchTerm);
 
     return matchesGender && matchesSearch;
   });
@@ -133,7 +164,6 @@ function renderTablePage() {
     const row = document.createElement('tr');
     row.className =
       'hover:bg-slate-50 transition-all duration-200 border-b border-slate-100';
-
     row.innerHTML = `
       <td class="px-6 py-4 even:bg-gray-50">
         <p class="text-sm font-semibold text-slate-900 truncate">${student.namePH || '-'}</p>
@@ -174,15 +204,15 @@ function renderTablePage() {
 
 // PAGINATION CONTROLS
 function updatePaginationControls(totalItems) {
-  const totalPages = Math.ceil(totalItems / rowsPerPage);
-
+  const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
   pageStart.textContent =
     totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
   pageEnd.textContent = Math.min(currentPage * rowsPerPage, totalItems);
   totalEntries.textContent = totalItems;
 
-  const oldPageButtons = pageContainer.querySelectorAll('.page-num-btn');
-  oldPageButtons.forEach((btn) => btn.remove());
+  pageContainer
+    .querySelectorAll('.page-num-btn')
+    .forEach((btn) => btn.remove());
 
   for (let i = 1; i <= totalPages; i++) {
     const btn = document.createElement('button');
@@ -200,26 +230,23 @@ function updatePaginationControls(totalItems) {
   }
 
   prevBtn.disabled = currentPage === 1;
-  nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+  nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   prevBtn.style.opacity = prevBtn.disabled ? '0.3' : '1';
   nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
 }
 
-// LISTENERS
-if (genderFilter) {
-  genderFilter.addEventListener('change', () => {
-    currentPage = 1;
-    renderTablePage();
-  });
-}
-
-// FIX: Mag-re-render ang table habang nagta-type sa search bar
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    currentPage = 1;
-    renderTablePage();
-  });
-}
+// EVENT LISTENERS
+[genderFilter, searchInput, filterOption].forEach((element) => {
+  if (element) {
+    element.addEventListener(
+      element.id === 'searchInput' ? 'input' : 'change',
+      () => {
+        currentPage = 1;
+        renderTablePage();
+      },
+    );
+  }
+});
 
 prevBtn.addEventListener('click', () => {
   if (currentPage > 1) {
@@ -229,19 +256,16 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  const selected = (genderFilter ? genderFilter.value : 'all').toLowerCase();
-  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-
-  const filteredCount = allStudents.filter((s) => {
-    const mg =
-      selected === 'all' || (s.genderPH || '').toLowerCase() === selected;
-    const ms =
-      (s.namePH || '').toLowerCase().includes(searchTerm) ||
-      (s.yearPH || '').toLowerCase().includes(searchTerm);
-    return mg && ms;
-  }).length;
-
-  if (currentPage < Math.ceil(filteredCount / rowsPerPage)) {
+  // Kunin ang current filtered count para sa limit
+  const selectedGender = genderFilter
+    ? genderFilter.value.toLowerCase()
+    : 'all';
+  const count = allStudents.filter(
+    (s) =>
+      selectedGender === 'all' ||
+      (s.genderPH || '').toLowerCase() === selectedGender,
+  ).length;
+  if (currentPage < Math.ceil(count / rowsPerPage)) {
     currentPage++;
     renderTablePage();
   }
@@ -274,7 +298,6 @@ window.editStudent = async function (id) {
     const data = snapshot.val();
     document.getElementById('modalWrapper').classList.remove('hidden');
     document.getElementById('studentId').value = id;
-
     const fields = [
       'namePH',
       'genderPH',
@@ -287,16 +310,14 @@ window.editStudent = async function (id) {
       'addressPH',
       'physicalHandicap',
     ];
-
-    fields.forEach((fieldId) => {
-      const el = document.getElementById(fieldId);
-      if (el) el.value = data[fieldId] || '';
+    fields.forEach((f) => {
+      if (document.getElementById(f))
+        document.getElementById(f).value = data[f] || '';
     });
-
-    const submitBtn = document.querySelector(
+    const btn = document.querySelector(
       '#studentUpdateForm button[type="submit"]',
     );
-    if (submitBtn) submitBtn.textContent = 'Update Student';
+    if (btn) btn.textContent = 'Update Student';
   }
 };
 
@@ -305,7 +326,6 @@ document
   .addEventListener('submit', async function (e) {
     e.preventDefault();
     const id = document.getElementById('studentId').value;
-
     const studentData = {
       namePH: document.getElementById('namePH').value,
       genderPH: document.getElementById('genderPH').value,
@@ -336,7 +356,6 @@ document
     }
   });
 
-// Modal Logic
 document.getElementById('studentFormBack').addEventListener('click', () => {
   document.getElementById('modalWrapper').classList.add('hidden');
 });
@@ -344,11 +363,9 @@ document.getElementById('studentFormBack').addEventListener('click', () => {
 document.getElementById('toggleFormStudent').addEventListener('click', () => {
   document.getElementById('studentUpdateForm').reset();
   document.getElementById('studentId').value = '';
-  const submitBtn = document.querySelector(
+  const btn = document.querySelector(
     '#studentUpdateForm button[type="submit"]',
   );
-  if (submitBtn) submitBtn.textContent = 'Add Student';
+  if (btn) btn.textContent = 'Add Student';
   document.getElementById('modalWrapper').classList.remove('hidden');
 });
-
-fetchStudents();

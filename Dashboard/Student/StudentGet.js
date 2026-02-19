@@ -40,8 +40,8 @@ const pageStart = document.getElementById('pageStart');
 const pageEnd = document.getElementById('pageEnd');
 const totalEntries = document.getElementById('totalEntries');
 const genderFilter = document.getElementById('genderFilter');
-const searchInput = document.getElementById('searchInput');
-const filterOption = document.getElementById('filterOption');
+const searchInput = document.getElementById('searchInput'); // Dagdag para sa search-aware pagination
+const filterOption = document.getElementById('filterOption'); // Dagdag para sa search-aware pagination
 
 // Pagination & Data State
 let allStudents = [];
@@ -96,19 +96,22 @@ function updateDashboardStats(total, male, female, working) {
   }
 }
 
-// HELPER: Get currently filtered list (Para pareho ang table at buttons)
-function getFilteredStudents() {
+// RENDER TABLE & FILTERING (INTEGRATED SEARCH)
+function renderTablePage() {
   const selectedGender = genderFilter
     ? genderFilter.value.toLowerCase()
     : 'all';
   const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const selectedSearchKey = filterOption ? filterOption.value : 'all';
 
-  return allStudents.filter((student) => {
+  //  Filter by Gender AND Search Input
+  const filteredStudents = allStudents.filter((student) => {
+    // Gender Filter logic
     const matchesGender =
       selectedGender === 'all' ||
       (student.gender || '').toLowerCase() === selectedGender;
 
+    // Search Filter logic
     let matchesSearch = true;
     if (searchValue) {
       if (selectedSearchKey === 'all') {
@@ -116,19 +119,18 @@ function getFilteredStudents() {
           String(val).toLowerCase().includes(searchValue),
         );
       } else {
+        // Mapping search keys to object properties if necessary
         const dbKey = selectedSearchKey.replace('PH', '');
         matchesSearch = String(student[dbKey] || '')
           .toLowerCase()
           .includes(searchValue);
       }
     }
+
     return matchesGender && matchesSearch;
   });
-}
 
-// RENDER TABLE & FILTERING
-function renderTablePage() {
-  const filteredStudents = getFilteredStudents();
+  // Pagination Calculations based on FILTERED results
   const totalItems = filteredStudents.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
@@ -201,7 +203,7 @@ function updatePaginationControls(totalItems) {
   nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
 }
 
-// EVENT LISTENERS
+//  EVENT LISTENERS
 if (genderFilter)
   genderFilter.addEventListener('change', () => {
     currentPage = 1;
@@ -226,14 +228,18 @@ prevBtn.addEventListener('click', () => {
 });
 
 nextBtn.addEventListener('click', () => {
-  const filteredStudents = getFilteredStudents(); // Ginamit ang helper para sa search-aware limit
-  if (currentPage < Math.ceil(filteredStudents.length / rowsPerPage)) {
+  const selected = (genderFilter ? genderFilter.value : 'all').toLowerCase();
+  const filteredCount = allStudents.filter(
+    (s) => selected === 'all' || (s.gender || '').toLowerCase() === selected,
+  ).length;
+
+  if (currentPage < Math.ceil(filteredCount / rowsPerPage)) {
     currentPage++;
     renderTablePage();
   }
 });
 
-// CRUD OPERATIONS
+// 5. CRUD OPERATIONS
 window.deleteStudent = function (id) {
   Swal.fire({
     title: 'Delete Student?',
